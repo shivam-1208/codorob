@@ -1,10 +1,15 @@
+import os
 import re
 from typing import List, Optional
+from dotenv import load_dotenv
 import google.generativeai as genai
 from langchain_core.language_models import LLM
 from langchain_core.outputs import Generation, LLMResult
 from langchain.agents import Tool, initialize_agent
 from langchain.agents.agent_types import AgentType
+
+# === Load environment variables from .env file ===
+load_dotenv()
 
 # === Gemini LangChain-Compatible Wrapper ===
 class GeminiLLM(LLM):
@@ -51,7 +56,6 @@ def generate_code(prompt: str) -> str:
 
         full_prompt = build_prompt(task, language)
         response = llm(full_prompt)
-        print("\n🧠 Generated Code:\n", response)
 
         code = extract_code(response, language)
         if not code:
@@ -61,8 +65,10 @@ def generate_code(prompt: str) -> str:
     except Exception as e:
         return f"❌ Error during code generation: {e}"
 
-# === Gemini API Key ===
-GEMINI_API_KEY = "AIzaSyBvsZoHDsdIpcXCqNMioZOdKD6qh-AOsdQ"  # Replace with your actual API key
+# === Get API Key from Environment ===
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("❌ GEMINI_API_KEY environment variable not set!")
 
 # === Instantiate Gemini LLM ===
 llm = GeminiLLM(api_key=GEMINI_API_KEY)
@@ -87,14 +93,14 @@ agent = initialize_agent(
     max_execution_time=30
 )
 
-# === Main Loop ===
+# === Main Loop (Optional for Local Testing) ===
 if __name__ == "__main__":
-    print("👋 Welcome! This tool can generate code in Python and C++.\nUse the format: describe task :: language (e.g., 'generate Fibonacci :: cpp')")
+    print("👋 Welcome! Use format: describe task :: language (e.g., 'generate Fibonacci :: cpp')")
     while True:
-        user_input = input("\nPrompt me to write code (or type 'exit'): ")
+        user_input = input("\nPrompt (or type 'exit'): ")
         if user_input.lower() in ["exit", "quit"]:
             print("👋 Goodbye!")
             break
-
         result = agent.run(user_input)
         print("▶️ Result:", result)
+
