@@ -1,6 +1,4 @@
-flask==2.3.2
-google-generativeai==0.3.2
-langchain==0.1.17
-langchain-core==0.1.45
-typing-extensions>=4.5.0
-python-dotenv==1.0.1
+Flask
+python-dotenv
+google-generativeai
+langchain
